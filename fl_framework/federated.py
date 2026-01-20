@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import copy
 from typing import Dict, Iterable, Tuple
 
@@ -20,7 +20,7 @@ class FederatedConfig:
     local_epochs: int = 1
     lr: float = 0.01
     device: str = "cpu"
-    compression: CompressionConfig = CompressionConfig()
+    compression: CompressionConfig = field(default_factory=CompressionConfig)
 
 
 class FederatedTrainer:
