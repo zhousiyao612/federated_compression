@@ -59,9 +59,7 @@ def main() -> None:
     )
     trainer = FederatedTrainer(model, client_loaders, test_loader, fed_config)
     _, accuracies = trainer.train()
-    for round_id, acc in enumerate(accuracies, start=1):
-        print(f"Round {round_id}: accuracy={acc:.4f}")
-    print(f"Total transmitted bits: {trainer.total_bits}")
+    print(f"Total transmitted bits: {trainer.total_bits:,}")
 
 
 if __name__ == "__main__":

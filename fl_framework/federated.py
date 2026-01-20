@@ -79,7 +79,7 @@ class FederatedTrainer:
     def train(self) -> Tuple[nn.Module, Iterable[float]]:
         self.model.to(self.config.device)
         accuracies = []
-        for _ in range(self.config.rounds):
+        for round_num in range(self.config.rounds):
             client_states = []
             for _, loader in self.client_loaders.items():
                 client_model = copy.deepcopy(self.model)
@@ -90,5 +90,7 @@ class FederatedTrainer:
                 client_states.append(compressed_state)
             averaged = average_state_dicts(client_states)
             self.model.load_state_dict(averaged)
-            accuracies.append(self._evaluate(self.model))
+            accuracy = self._evaluate(self.model)
+            accuracies.append(accuracy)
+            print(f"Round {round_num + 1}: accuracy={accuracy:.4f}, total_bits={self.total_bits:,}")
         return self.model, accuracies
