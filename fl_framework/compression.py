@@ -118,5 +118,11 @@ def average_state_dicts(state_dicts: Iterable[Dict[str, torch.Tensor]]) -> Dict[
     state_dicts = list(state_dicts)
     for key in state_dicts[0]:
         stacked = torch.stack([sd[key] for sd in state_dicts], dim=0)
-        averaged[key] = stacked.mean(dim=0)
+        # Convert to float for averaging if needed
+        if stacked.dtype in [torch.int8, torch.int16, torch.int32, torch.int64, torch.uint8]:
+            original_dtype = stacked.dtype
+            stacked_float = stacked.float()
+            averaged[key] = stacked_float.mean(dim=0).to(original_dtype)
+        else:
+            averaged[key] = stacked.mean(dim=0)
     return averaged
