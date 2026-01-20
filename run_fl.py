@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--error-feedback", action="store_true")
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--celeba-attr", default="Smiling")
-    parser.add_argument("--device", default="cpu")
+    parser.add_argument("--device", default="gpu")
     return parser.parse_args()
 
 
