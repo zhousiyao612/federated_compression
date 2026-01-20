@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--non-iid-alpha", type=float, default=0.5)
     parser.add_argument("--rounds", type=int, default=5)
     parser.add_argument("--local-epochs", type=int, default=1)
-    parser.add_argument("--lr", type=float, default=0.01)
+    parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument("--compression", default="none", choices=["none", "topk", "quant"])
     parser.add_argument("--topk-ratio", type=float, default=0.1)
     parser.add_argument("--quant-bits", type=int, default=8)
