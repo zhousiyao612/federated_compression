@@ -20,6 +20,7 @@ class DatasetConfig:
     num_clients: int = 10
     non_iid_alpha: float = 0.5
     celeba_attr: str = "Smiling"
+    image_size: int = 32  # Default for CIFAR, will be overridden for ViT models
 
 
 def _get_label_targets(dataset, celeba_attr: str) -> torch.Tensor:
@@ -62,9 +63,17 @@ def _dirichlet_partition(labels: torch.Tensor, num_clients: int, alpha: float) -
 
 
 def build_dataset(config: DatasetConfig) -> Tuple[torch.utils.data.Dataset, torch.utils.data.Dataset]:
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-    ])
+    # Use appropriate image size - resize for ViT models, keep original for CNNs
+    if config.image_size != 32:  # Need to resize
+        transform = transforms.Compose([
+            transforms.Resize((config.image_size, config.image_size)),
+            transforms.ToTensor(),
+        ])
+    else:  # Keep original size
+        transform = transforms.Compose([
+            transforms.ToTensor(),
+        ])
+    
     if config.name == "cifar10":
         train = datasets.CIFAR10(config.data_dir, train=True, download=False, transform=transform)
         test = datasets.CIFAR10(config.data_dir, train=False, download=False, transform=transform)
@@ -72,11 +81,18 @@ def build_dataset(config: DatasetConfig) -> Tuple[torch.utils.data.Dataset, torc
         train = datasets.CIFAR100(config.data_dir, train=True, download=False, transform=transform)
         test = datasets.CIFAR100(config.data_dir, train=False, download=False, transform=transform)
     elif config.name == "mnist":
+        # MNIST is grayscale, need to convert to RGB for ViT models
+        if config.image_size != 28:  # ViT model
+            transform = transforms.Compose([
+                transforms.Grayscale(num_output_channels=3),  # Convert to RGB
+                transforms.Resize((config.image_size, config.image_size)),
+                transforms.ToTensor(),
+            ])
         train = datasets.MNIST(config.data_dir, train=True, download=False, transform=transform)
         test = datasets.MNIST(config.data_dir, train=False, download=False, transform=transform)
     elif config.name == "celeba":
         transform = transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((config.image_size, config.image_size)),
             transforms.ToTensor(),
         ])
         train = datasets.CelebA(config.data_dir, split="train", download=True, transform=transform, target_type="attr")

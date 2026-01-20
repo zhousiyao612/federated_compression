@@ -29,12 +29,21 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    
+    # Determine image size based on model
+    image_size = 32  # Default for CNN models
+    if "vit" in args.model.lower() or "deit" in args.model.lower():
+        image_size = 224  # ViT models expect 224x224
+    elif args.dataset == "mnist":
+        image_size = 28 if "vit" not in args.model.lower() and "deit" not in args.model.lower() else 224
+    
     dataset_config = DatasetConfig(
         name=args.dataset,
         batch_size=args.batch_size,
         num_clients=args.num_clients,
         non_iid_alpha=args.non_iid_alpha,
         celeba_attr=args.celeba_attr,
+        image_size=image_size,
     )
     client_loaders, test_loader = build_dataloaders(dataset_config)
     num_classes = {
