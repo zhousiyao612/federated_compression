@@ -93,11 +93,13 @@ def build_dataloaders(config: DatasetConfig) -> Tuple[Dict[int, DataLoader], Dat
     client_loaders: Dict[int, DataLoader] = {}
     for client_id, indices in enumerate(client_indices):
         subset = Subset(train_dataset, indices)
+        # Use drop_last=True to avoid batch size 1 issues with BatchNorm
         client_loaders[client_id] = DataLoader(
             subset,
-            batch_size=config.batch_size,
+            batch_size=min(config.batch_size, len(indices)),  # Adjust batch size if client has few samples
             shuffle=True,
             num_workers=config.num_workers,
+            drop_last=len(indices) > 1,  # Only drop last if we have more than 1 sample
         )
     test_loader = DataLoader(
         test_dataset,

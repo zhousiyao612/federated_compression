@@ -45,6 +45,13 @@ class FederatedTrainer:
             for inputs, targets in loader:
                 inputs = inputs.to(self.config.device)
                 targets = targets.to(self.config.device)
+                
+                # Handle batch size of 1 by switching to eval mode for BatchNorm
+                if inputs.size(0) == 1:
+                    model.eval()
+                else:
+                    model.train()
+                
                 optimizer.zero_grad()
                 outputs = model(inputs)
                 targets = self._normalize_targets(targets)
