@@ -14,7 +14,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="resnet18")
     parser.add_argument("--num-clients", type=int, default=10)
     parser.add_argument("--non-iid-alpha", type=float, default=0.5)
-    parser.add_argument("--rounds", type=int, default=5)
+    parser.add_argument("--rounds", type=int, default=1)
     parser.add_argument("--local-epochs", type=int, default=1)
     parser.add_argument("--lr", type=float, default=0.1)
     parser.add_argument("--compression", default="none", choices=["none", "topk", "quant"])
