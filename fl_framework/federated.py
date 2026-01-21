@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import copy
+import os
 from typing import Dict, Iterable, Tuple
 
 import torch
@@ -21,6 +22,7 @@ class FederatedConfig:
     lr: float = 0.01
     device: str = "cpu"
     compression: CompressionConfig = field(default_factory=CompressionConfig)
+    log_file: str = "training_log.txt"
 
 
 class FederatedTrainer:
@@ -37,6 +39,12 @@ class FederatedTrainer:
         self.config = config
         self.compressor = build_compressor(config.compression)
         self.total_bits = 0
+        
+        # Initialize log file
+        os.makedirs(os.path.dirname(self.config.log_file) if os.path.dirname(self.config.log_file) else ".", exist_ok=True)
+        with open(self.config.log_file, 'w') as f:
+            f.write("Federated Learning Training Log\n")
+            f.write("=" * 40 + "\n\n")
 
     def _train_client(self, model: nn.Module, loader: DataLoader) -> nn.Module:
         model.train()
@@ -99,5 +107,10 @@ class FederatedTrainer:
             self.model.load_state_dict(averaged)
             accuracy = self._evaluate(self.model)
             accuracies.append(accuracy)
-            print(f"Round {round_num + 1}: accuracy={accuracy:.4f}, total_bits={self.total_bits:,}")
+            log_message = f"Round {round_num + 1}: accuracy={accuracy:.4f}, total_bits={self.total_bits:,}"
+            print(log_message)
+            
+            # Write to log file
+            with open(self.config.log_file, 'a') as f:
+                f.write(log_message + "\n")
         return self.model, accuracies

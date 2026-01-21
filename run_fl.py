@@ -24,6 +24,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-size", type=int, default=64)
     parser.add_argument("--celeba-attr", default="Smiling")
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--log-file", default="training_log.txt", help="Path to training log file")
     return parser.parse_args()
 
 
@@ -65,10 +66,17 @@ def main() -> None:
         lr=args.lr,
         device=args.device,
         compression=compression,
+        log_file=args.log_file,
     )
     trainer = FederatedTrainer(model, client_loaders, test_loader, fed_config)
     _, accuracies = trainer.train()
-    print(f"Total transmitted bits: {trainer.total_bits:,}")
+    final_message = f"Total transmitted bits: {trainer.total_bits:,}"
+    print(final_message)
+    
+    # Write final message to log file
+    with open(fed_config.log_file, 'a') as f:
+        f.write("\n" + "=" * 40 + "\n")
+        f.write(final_message + "\n")
 
 
 if __name__ == "__main__":
